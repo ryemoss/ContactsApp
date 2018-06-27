@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet" />﻿
+    <link href="/styles.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+    <script
+      src="https://code.jquery.com/jquery-3.3.1.js"
+      integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+      crossorigin="anonymous"></script>
+      <script src="https://www.gstatic.com/firebasejs/5.1.0/firebase.js"></script>
+  </head>
+  <body>
+    <h1 class="title">ContactsApp</h1>
+    <div id="homepage">
+
+    </div>
+
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src="https://unpkg.com/react@15/dist/react.js"></script>
+    <script src="https://unpkg.com/react-dom@15/dist/react-dom.min.js"></script>
+    <script>
+      // Initialize Firebase
+      var config = {
+        apiKey: "AIzaSyCV1S2WA6mSK_kv_C7AhrtcatzXkmLYl0A",
+        authDomain: "ryemosscontactsdb.firebaseapp.com",
+        databaseURL: "https://ryemosscontactsdb.firebaseio.com",
+        projectId: "ryemosscontactsdb",
+        storageBucket: "ryemosscontactsdb.appspot.com",
+        messagingSenderId: "65993636868"
+      };
+      firebase.initializeApp(config);
+      const db = firebase.firestore();
+      db.settings({ timestampsInSnapshots: true});
+      var storageRef = firebase.storage().ref();
+
+    </script>
+
+    <script type="text/babel">
+      class MainContent extends React.Component{
+        constructor(props){
+          super(props);
+          this.deleteAll = this.deleteAll.bind(this);
+          this.doRefresh = this.doRefresh.bind(this);
+          this.saveInfo = this.saveInfo.bind(this);
+          this.deleteOne = this.deleteOne.bind(this);
+          this.handleContactClick = this.handleContactClick.bind(this);
+        }
+        render(){
+          return(
+            <div className="maincontainer">
+              <div className="cardcontainer">
+                <div id="contacts">
+                  <Contacts ref="contc" contactClicked={this.handleContactClick}/>
+                </div>
+              </div>
+              <div id="detailcontainer" className="detailcontainer">
+                <MainDetail ref="detc" deleteCall={this.deleteAll} saveCall={this.saveInfo} deleteOneCall={this.deleteOne}/>
+              </div>
+            </div>
+          )
+        }
+        deleteAll() {
+          fetch('/api/contacts', {
+            method: 'delete',
+            headers: new Headers({
+              'Content-Type': 'application/json'
+            })
+          })
+          this.doRefresh();
+        }
+        doRefresh() {
+          this.refs.contc.refreshContacts();
+        }
+        handleContactClick(contact) {
+          this.refs.detc.updateDetails(contact);
+        }
+        saveInfo(contactDetails) {
+          this.refs.contc.handleUpdate(contactDetails);
+        }
+        deleteOne(contactDetails) {
+          this.refs.contc.deleteOne(contactDetails);
+        }
+      };
+
+      class Contacts extends React.Component{
+        constructor(props){
+          super(props);
+          this.state ={ contacts: [] };
+          this.refreshContacts();
+          this.handleUpdate = this.handleUpdate.bind(this);
+          this.deleteOne = this.deleteOne.bind(this);
+        }
+        oncontactClick(cont, e){
+          this.props.contactClicked(cont);
+        }
+        render(){
+          var contacts = this.state.contacts;
+          contacts = contacts.map(function(contact, index){
+            return(
+              <div key={index} className="contactcard" onClick={this.oncontactClick.bind(this, contact)}>
+                <img className="cardphoto" src={contact.picture}/>
+                <div className="name">{contact.name}</div>
+              </div>
+            )
+          }, this);
+          return(
+            <div id="addcontainer">
+              <form id="addinput" onSubmit={this.handleSubmit.bind(this)}>
+                <input type="text" ref="name" placeholder="name" required/>
+              </form>
+              <ul>{contacts}</ul>
+            </div>
+          );
+        }
+        handleSubmit(e){
+          e.preventDefault();
+          var name = this.refs.name.value;
+
+          fetch('/api/contacts', {
+            method: 'post',
+            headers: new Headers({
+              'Content-Type': 'application/json'
+            }),
+            body: JSON.stringify({
+              "name": name
+            })
+          }).then(function(data){
+            return data.json();
+          });
+          this.refreshContacts();
+        }
+        handleUpdate(contactDetails) {
+          var name = contactDetails.name;
+          fetch('/api/contacts/' + name, {
+            method: 'put',
+            headers: new Headers({
+              'Content-Type': 'application/json'
+            }),
+            body: JSON.stringify({
+              "name": contactDetails.name,
+              "email": contactDetails.email,
+              "company": contactDetails.company,
+              "picture": contactDetails.picture,
+            })
+          }).then(function(data){
+            return data.json();
+          });
+          this.refreshContacts();
+        }
+        refreshContacts(){
+          fetch('/api/contacts').then(function(data){
+            return data.json();
+          }).then(
+            json => {
+            this.setState({
+              contacts: json
+            });
+          })
+        }
+        deleteOne(contactDetails) {
+          var name = contactDetails.name;
+          console.log(name);
+          fetch('/api/contacts/' + name, {
+            method: 'delete',
+            headers: new Headers({
+              'Content-Type': 'application/json'
+            })
+          });
+          this.refreshContacts();
+        }
+      };
+
+      class MainDetail extends React.Component{
+        constructor(props){
+          super(props);
+          this.state ={
+              detname:'',
+              detcompany:'',
+              detemail:'',
+              detpic:'./content/images/blank-profile.png'
+            };
+          this.handleDeleteOne = this.handleDeleteOne.bind(this);
+          this.handleDelete = this.handleDelete.bind(this);
+          this.handleChange = this.handleChange.bind(this);
+          this.updateDetails = this.updateDetails.bind(this);
+          this.handleSave = this.handleSave.bind(this);
+          this.fileChangeHandler = this.fileChangeHandler.bind(this);
+        }
+        render(){
+          return(
+            <div id="detailmaincontainer">
+              <div className="detailimagecontainer">
+                <input type='file' onChange={this.fileChangeHandler}/>
+                  <img className="detailimage" src={this.state.detpic}/>
+              </div>
+              <input id="detname" type="text" placeholder="name"  value={this.state.detname} onChange={this.handleChange}/>
+              <input id="detemail" type="text" placeholder="email" value={this.state.detemail} onChange={this.handleChange}/>
+              <input id="detcompany" type="text" placeholder="company" value={this.state.detcompany} onChange={this.handleChange}/>
+              <button id="deleteAllButton" onClick={this.handleDelete}>delete all</button>
+              <button id="deleteCurrent" onClick={this.handleDeleteOne}>delete this</button>
+              <button id="saveChanges" onClick={this.handleSave}>save</button>
+            </div>
+          )
+        }
+        handleChange(event) {
+          this.setState({[event.target.id]: event.target.value});
+        }
+        handleDelete() {
+          this.props.deleteCall();
+        }
+        handleDeleteOne() {
+          var contact = this.getContact();
+          this.props.deleteOneCall(contact);
+        }
+        fileChangeHandler(e) {
+          var file = e.target.files[0];
+          var uploadTask = storageRef.child('contactPictures/' + file.name).put(file);
+          uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED, (snapshot) => {
+              var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              console.log('Upload is ' + progress + '% done');
+          }, function(error) {
+            // handle errors
+          }, () => {
+              uploadTask.snapshot.ref.getDownloadURL().then((downloadURL)=> {
+                this.setState({detpic: downloadURL});
+            });
+          })
+          //this.setState({picture: file.name});
+        }
+        getContact() {
+          var contact = {
+            name: this.state.detname,
+            email: this.state.detemail,
+            company: this.state.detcompany,
+            picture: this.state.detpic
+          };
+          return contact;
+        }
+        handleSave() {
+          var contact = this.getContact();
+          this.props.saveCall(contact);
+          this.updateDetails(contact);
+        }
+        updateDetails(contact) {
+          this.setState({
+            detname: contact.name,
+            detemail: contact.email,
+            detcompany: contact.company,
+            detpic: contact.picture,
+          });
+        }
+      };
+
+      ReactDOM.render(<MainContent />, document.getElementById("homepage"));
+
+    </script>
+
+  </body>
+</html>
