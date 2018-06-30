@@ -1,35 +1,73 @@
 body{
   font-family: "Raleway";
   color: #888;
-  background: #3a3a3a;
+  background: #7a7a7a;
   margin: 10px 30px;
 }
 #homepage{
-  max-width: 1000px;
   margin: 60px auto;
-  padding: 10px 20px;
-  background: #fdfdfd;
-  border-radius: 4px;
+  background: #ffffff;
+  border-radius: 6px;
   box-shadow: 1px 2px 3px rgba(0,0,0,0.2);
+  padding: 20px;
 }
+button{
+  vertical-align: middle;
+  float: right;
+  background: none;
+  padding-top: -12px;
+  border: 0;
+  color: #2CBAE7;
+  display: inline-block;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: "Raleway";
+}
+button.false{display: none;}
+
 input[type="text"]{
   display: block;
-  width: 300px;
-  margin: 6px 0;
+  width: 240px;
+  margin: 6px auto;
   padding: 8px;
+  outline: none;
   border-radius: 4px;
-  border: 1px solid #ddd;
+}
+input[type='submit']{
+  background: #555;
+  color: #fff;
+  border: 0;
+  padding: 10px;
+  font-size: 18px;
+  width: 200px;
+  margin: 0 auto;
+  display: block;
+  cursor: pointer;
+  border-radius: 4px;
 }
 .maincontainer{
   display:flex;
 }
+.addcontactbtn {
+  font-size: 48px;
+  margin: auto 0px;
+  margin-left: 45px;
+  font-weight: 100;
+  border: none;
+  outline: none;
+}
 .cardcontainer{
   display: flex;
+  align-items: center;
   flex-direction: column;
+  position: relative;
+}
+.addinputform {
+  margin: 10px;
 }
 .cardphoto{
-  width: 70px;
-  height: 70px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
 }
 .color{
@@ -40,8 +78,8 @@ input[type="text"]{
   flex-direction: row;
   background-color: white;
   align-items: center;
-  margin: 10px;
-  padding: 10px;
+  margin: 5px 15px;
+  padding: 5px;
   border: 2px solid white;
 }
 .contactcard > .name {
@@ -59,18 +97,19 @@ input[type="text"]{
   height: 450px;
   max-height: 500px;
   align-items: center;
-  border: 3px solid #3a3a3a;
   background-color: white;
-}
-.detailcontainer > input{
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid gray;
 }
 .detailimagecontainer{
   align-items: center;
 }
+.detailcontainer input {
+  background: transparent;
+  border: none;
+  border-radius: 0px;
+  border-bottom: 1px solid lightgray;
+}
 .detailimage{
+  cursor: pointer;
   display: block;
   width: 220px;
   height: 220px;
@@ -78,29 +117,53 @@ input[type="text"]{
   background-size: cover;
   margin: 20px auto;
 }
+.detailmaincontainer{
+  position: relative;
+  width: 100%;
+}
+.button-delete {
+  font-size: 26px;
+  top: 0px;
+  right: 0px;
+  position: absolute;
+}
+.button-deleteall {
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+}
+.searchbar {
+  background: transparent;
+  border: none;
+}
 .title{
   color: #fff;
   text-align: center;
   font-size: 32px; /*48*/
 }
+.horizontaldivider {
+  margin: 1px 0px;
+  background-color: lightgray;
+  height: 1px;
+  width: 100%;
+}
+.verticaldivider {
+  margin: 10px 50px;
+  background-color: lightgray;
+  height: 400px;
+  width: 1px;
+}
+.flex-row{
+  display: flex;
+  flex-direction: row;
+}
 #homepage h1{
   text-align: center;
+  margin-left: 30px;
 }
 form{
   max-width: 350px;
   margin: 30px auto;
-}
-input[type='submit']{
-  background: #555;
-  color: #fff;
-  border: 0;
-  padding: 10px;
-  font-size: 18px;
-  width: 200px;
-  margin: 0 auto;
-  display: block;
-  cursor: pointer;
-  border-radius: 4px;
 }
 ul{
   margin: 0;
@@ -118,14 +181,3 @@ li{
 span{
   margin: 0 20px;
 }
-button{
-  float: right;
-  background: green;
-  border: 0;
-  padding: 5px 10px;
-  color: #fff;
-  display: inline-block;
-  border-radius: 4px;
-  cursor: pointer;
-}
-button.false{display: none;}

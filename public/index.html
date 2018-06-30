@@ -13,9 +13,7 @@
       <script src="https://www.gstatic.com/firebasejs/5.1.0/firebase.js"></script>
   </head>
   <body>
-    <h1 class="title">ContactsApp</h1>
     <div id="homepage">
-
     </div>
 
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
@@ -52,12 +50,20 @@
           return(
             <div className="maincontainer">
               <div className="cardcontainer">
+                <div className="flex-row">
+                  <h1>Contacts</h1>
+                  <button id="addcontactbtn" className="addcontactbtn" onClick={this.addContact.bind(this)}>+</button>
+                </div>
+                <div className="horizontaldivider"></div>
                 <div id="contacts">
                   <Contacts ref="contc" contactClicked={this.handleContactClick}/>
                 </div>
+                <button className="button-deleteall" id="deleteAllButton" onClick={this.deleteAll}>Delete All</button>
+              </div>
+              <div className="verticaldivider">
               </div>
               <div id="detailcontainer" className="detailcontainer">
-                <MainDetail ref="detc" deleteCall={this.deleteAll} saveCall={this.saveInfo} deleteOneCall={this.deleteOne}/>
+                <MainDetail ref="detc" saveCall={this.saveInfo} deleteOneCall={this.deleteOne}/>
               </div>
             </div>
           )
@@ -83,15 +89,18 @@
         deleteOne(contactDetails) {
           this.refs.contc.deleteOne(contactDetails);
         }
+        addContact() {
+          this.refs.contc.handleSubmit();
+        }
       };
 
       class Contacts extends React.Component{
         constructor(props){
           super(props);
           this.state ={ contacts: [] };
-          this.refreshContacts();
           this.handleUpdate = this.handleUpdate.bind(this);
           this.deleteOne = this.deleteOne.bind(this);
+          this.refreshContacts();
         }
         oncontactClick(cont, e){
           this.props.contactClicked(cont);
@@ -108,24 +117,22 @@
           }, this);
           return(
             <div id="addcontainer">
-              <form id="addinput" onSubmit={this.handleSubmit.bind(this)}>
-                <input type="text" ref="name" placeholder="name" required/>
+              <form id="addinput" className="addinputform" onSubmit={this.handleSearch.bind(this)}>
+                <input className="searchbar" type="text" ref="name" placeholder="Search" required/>
               </form>
+              <div className="horizontaldivider"></div>
               <ul>{contacts}</ul>
             </div>
           );
         }
-        handleSubmit(e){
+        handleSearch(e) {
           e.preventDefault();
-          var name = this.refs.name.value;
-
+        }
+        handleSubmit() {
           fetch('/api/contacts', {
             method: 'post',
             headers: new Headers({
               'Content-Type': 'application/json'
-            }),
-            body: JSON.stringify({
-              "name": name
             })
           }).then(function(data){
             return data.json();
@@ -133,8 +140,8 @@
           this.refreshContacts();
         }
         handleUpdate(contactDetails) {
-          var name = contactDetails.name;
-          fetch('/api/contacts/' + name, {
+          var id = contactDetails._id;
+          fetch('/api/contacts/' + id, {
             method: 'put',
             headers: new Headers({
               'Content-Type': 'application/json'
@@ -161,9 +168,8 @@
           })
         }
         deleteOne(contactDetails) {
-          var name = contactDetails.name;
-          console.log(name);
-          fetch('/api/contacts/' + name, {
+          var id = contactDetails._id;
+          fetch('/api/contacts/' + id, {
             method: 'delete',
             headers: new Headers({
               'Content-Type': 'application/json'
@@ -183,7 +189,6 @@
               detpic:'./content/images/blank-profile.png'
             };
           this.handleDeleteOne = this.handleDeleteOne.bind(this);
-          this.handleDelete = this.handleDelete.bind(this);
           this.handleChange = this.handleChange.bind(this);
           this.updateDetails = this.updateDetails.bind(this);
           this.handleSave = this.handleSave.bind(this);
@@ -191,25 +196,24 @@
         }
         render(){
           return(
-            <div id="detailmaincontainer">
+            <div className="detailmaincontainer">
               <div className="detailimagecontainer">
-                <input type='file' onChange={this.fileChangeHandler}/>
-                  <img className="detailimage" src={this.state.detpic}/>
+                <form>
+                  <input type='file' ref='fbrowser' onChange={this.fileChangeHandler} style={{"display":"none"}}/>
+                  <img className="detailimage" onClick={(e)=>this.refs.fbrowser.click()} src={this.state.detpic}/>
+                </form>
               </div>
+              <input id="detid" type="text" placeholder="id" value={this.state.detid} onChange={this.handleChange} style={{"display": "none"}}/>
               <input id="detname" type="text" placeholder="name"  value={this.state.detname} onChange={this.handleChange}/>
               <input id="detemail" type="text" placeholder="email" value={this.state.detemail} onChange={this.handleChange}/>
               <input id="detcompany" type="text" placeholder="company" value={this.state.detcompany} onChange={this.handleChange}/>
-              <button id="deleteAllButton" onClick={this.handleDelete}>delete all</button>
-              <button id="deleteCurrent" onClick={this.handleDeleteOne}>delete this</button>
-              <button id="saveChanges" onClick={this.handleSave}>save</button>
+              <button className="button-delete" id="deleteCurrent" onClick={this.handleDeleteOne}>x</button>
+              <button id="saveChanges" onClick={this.handleSave}>Save</button>
             </div>
           )
         }
         handleChange(event) {
           this.setState({[event.target.id]: event.target.value});
-        }
-        handleDelete() {
-          this.props.deleteCall();
         }
         handleDeleteOne() {
           var contact = this.getContact();
@@ -232,6 +236,7 @@
         }
         getContact() {
           var contact = {
+            _id: this.state.detid,
             name: this.state.detname,
             email: this.state.detemail,
             company: this.state.detcompany,
@@ -246,6 +251,7 @@
         }
         updateDetails(contact) {
           this.setState({
+            detid: contact._id,
             detname: contact.name,
             detemail: contact.email,
             detcompany: contact.company,

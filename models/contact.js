@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 const ContactSchema = new Schema({
   name: {
     type: String,
-    required: [true, 'Name field is required']
+    default: 'New Contact'
   },
   company: {
     type: String,

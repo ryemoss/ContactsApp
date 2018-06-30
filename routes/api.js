@@ -34,11 +34,20 @@ router.post('/contacts', function(req, res, next){
     res.send(contact);
   }).catch(next);
 });
-
+/*
 // PUT update contact in list
 router.put('/contacts/:name', function(req, res, next){
   Contact.findOneAndUpdate({name: req.params.name}, req.body).then(function(){
     Contact.findOne({name: req.body.name}).then(function(contact){
+      res.send(contact);
+    }).catch(next);
+  });
+});*/
+
+// PUT update contact in list
+router.put('/contacts/:id', function(req, res, next){
+  Contact.findByIdAndUpdate({_id: req.params.id}, req.body).then(function(){
+    Contact.findById({_id: req.params.id}).then(function(contact){
       res.send(contact);
     }).catch(next);
   });
@@ -51,8 +60,8 @@ router.delete('/contacts', function(req, res, next){
 });
 
 // DELETE contact from list
-router.delete('/contacts/:name', function(req, res, next){
-  Contact.remove({name: req.params.name}).then(function(contact){
+router.delete('/contacts/:id', function(req, res, next){
+  Contact.remove({_id: req.params.id}).then(function(contact){
     res.send(contact + ' deleted');
   });
 });
